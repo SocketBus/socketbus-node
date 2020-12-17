@@ -24,12 +24,14 @@
   },
   "homepage": "https://github.com/SocketBus/socketbus-node#readme",
   "dependencies": {
-    "axios": "^0.21.0"
+    "axios": "^0.21.0",
+    "crypto-js": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
     "@types/axios": "^0.14.0",
+    "@types/crypto-js": "^4.0.1",
     "@webpack-cli/init": "^1.0.3",
     "babel-loader": "^8.2.2",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",

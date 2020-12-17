@@ -1,12 +1,28 @@
 import axios from 'axios';
 
 import { createHash, randomBytes, createCipheriv } from "crypto";
+import { AES, enc, lib } from "crypto-js";
 
 import SocketBusOptions from './interfaces/SocketBusOptions';
 import BroadcastResult from './interfaces/BroadcastResult';
 
 const SOCKEBUS_DOMAIN = 'https://app.socketbus.com';
-const SALT_LENGTH = 8;
+
+var CryptoJSAesJson = {
+    'stringify': function (cipherParams: any) {
+        var j:any = { ct: cipherParams.ciphertext.toString(enc.Base64) }
+        if (cipherParams.iv) j.iv = cipherParams.iv.toString()
+        if (cipherParams.salt) j.s = cipherParams.salt.toString()
+        return JSON.stringify(j).replace(/\s/g, '')
+    },
+    'parse': function (jsonStr:any) {
+        var j = JSON.parse(jsonStr)
+        var cipherParams = lib.CipherParams.create({ ciphertext: enc.Base64.parse(j.ct) })
+        if (j.iv) cipherParams.iv = enc.Hex.parse(j.iv);
+        if (j.s) cipherParams.salt = enc.Hex.parse(j.s);
+        return cipherParams
+    }
+}
 
 export default class SocketBus {
 
@@ -86,32 +102,24 @@ export default class SocketBus {
 
         let password = this.generatedE2EPassword(channelName);
 
-        let salt = randomBytes(SALT_LENGTH);
+        data = AES.encrypt(JSON.stringify(data), password, {
+            format: CryptoJSAesJson
+        }).toString();
 
-        let salted = '';
-        let dx = '';
+        return data;
+    }
 
-        while(salted.length < 48) {
-            dx = createHash('md5').update(`${dx}.${password}.${salt}`).digest('hex');
-            salted += dx;
+    private async get(url: string) {
+        try {
+            let response = await this.http.get(url);
+            return response.data;
+        } catch(e) {
+            if (e.response) {
+                throw new Error("SocketBus Error " + JSON.stringify(e.response.data));
+            } else {
+                throw new Error(e);
+            }
         }
-
-        let key = salted.substring(0, 32);
-        let iv = salted.substring(32, 16);
-
-        let cipher = createCipheriv('aes-256-cbc', key, iv);
-        let encrypted_data = cipher.update(JSON.stringify(data), 'utf8', 'base64');
-
-        encrypted_data += cipher.final('base64')
-
-        let return_data = {
-            ct: encrypted_data,
-            iv: Buffer.from(iv, 'ascii').toString('hex'),
-            s: salt.toString('hex')
-        }
-
-
-        return JSON.stringify(return_data);
     }
 
 
@@ -123,10 +131,11 @@ export default class SocketBus {
     //===============================================//
 
     /**
+     * Generates the response needed for authenticate an user in a channel
      * 
-     * @param socketId 
-     * @param channelName 
-     * @param result 
+     * @param socketId Socket Id of the user trying to authenticate, this information comes on the auth request
+     * @param channelName The name of the channel that the user is trying to authenticate
+     * @param result A boolean that informs if the user can(true) or can not(false) be authenticated to channel 
      */
     public auth(socketId: string, channelName: string, result: boolean = true) {
         return this.parseResult({
@@ -138,6 +147,13 @@ export default class SocketBus {
         
     }
 
+    /**
+     * Broadcasts a payload to a channel
+     * 
+     * @param channels A string or array of strings with the names of the channel to be broadcasted
+     * @param eventName The name of the event to be broadcasted
+     * @param data The data to be sent to the clients
+     */
     public broadcast(channels: Array<string>|string, eventName: string, data: any): Promise<Array<BroadcastResult>> {
 
         return new Promise((resolve: CallableFunction, reject: CallableFunction) => {
@@ -178,19 +194,6 @@ export default class SocketBus {
                 }
             }
         });
-    }
-
-    private async get(url: string) {
-        try {
-            let response = await this.http.get(url);
-            return response.data;
-        } catch(e) {
-            if (e.response) {
-                throw new Error("SocketBus Error " + JSON.stringify(e.response.data));
-            } else {
-                throw new Error(e);
-            }
-        }
     }
 
     /**
