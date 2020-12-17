@@ -70,7 +70,16 @@ export default class SocketBus {
      * @param data data to be encrypted
      */
     private encrypt(data: any) {
+        let json = JSON.stringify(data);
 
+        let key = createHash('sha256').update(this.options.secret).digest('hex').substring(0, 32);
+        let iv = createHash('sha256').update(this.options.app_id).digest('hex').substring(0, 16);
+
+        let cipher = createCipheriv('aes-256-cbc', key, iv);
+        let encrypted = cipher.update(json, 'utf8', 'base64');
+        encrypted += cipher.final('base64');
+
+        return encrypted;
     }
 
     /**
@@ -144,7 +153,13 @@ export default class SocketBus {
     }
 
     public authPresence(socketId: string, channelName: string, userId: any, result: boolean = true) {
-        
+        let encryption = this.encrypt(this.encryptData(result, channelName));
+
+        return this.parseResult({
+            auth: this.generateHash(socketId, channelName),
+            data: encryption,
+            presence: true
+        }, channelName);
     }
 
     /**

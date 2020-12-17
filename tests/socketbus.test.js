@@ -36,5 +36,39 @@ describe('SocketBus', function() {
     
         expect(socketBus.authWebhook(authorization1)).toBe(true);
         expect(socketBus.authWebhook(authorization2)).toBe(false);
-    })
+    });
+
+    it('Auth presence', () => {
+        const auth = socketBus.authPresence('socket-id', 'some-channel', 1, { user_id: 20 });
+        
+        expect(auth.data).toBeDefined();
+    });
+    
+    it('Get API status', () => {
+        return socketBus.getStatus()
+            .then(result => {
+                expect(result.users_count).toBeDefined();
+            })
+    });
+    
+    it('Get API Channels', () => {
+        return socketBus.getChannels()
+            .then(result => {
+                expect(Array.isArray(result.rooms)).toBe(true);
+            })
+    });
+    
+    it('Get API Users Count in Channels', () => {
+        return socketBus.getCountUsersInChannel('presence-teste')
+            .then(result => {
+                expect(result.users_count).toBeDefined();
+            })
+    });
+    
+    it('Get API Users', () => {
+        return socketBus.getUsersInChannel('presence-teste')
+            .then(result => {
+                expect(Array.isArray(result.users)).toBe(true);
+            })
+    });
 })
