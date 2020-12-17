@@ -157,11 +157,12 @@ export default class SocketBus {
     }
 
     /**
+     * Authenticates an user in a presence channel
      * 
      * @param socketId Socket Id of the user trying to authenticate, this information comes on the auth request
      * @param channelName The name of the channel that the user is trying to authenticate
-     * @param userId 
-     * @param result Data
+     * @param userId Id of the current user
+     * @param result Data to be sent to the users in the channel
      */
     public authPresence(socketId: string, channelName: string, userId: any, result: any) {
         if (!result) {
