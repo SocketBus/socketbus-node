@@ -145,7 +145,6 @@ export default class SocketBus {
                 channels = [channels];
             }
 
-
             let res: Array<BroadcastResult> = []
 
             function tryResolve(response: boolean, channel: string) {
@@ -161,7 +160,6 @@ export default class SocketBus {
                     resolve(res);
                 }
             }
-    
     
             for (const key in channels) {
                 if (Object.prototype.hasOwnProperty.call(channels, key)) {
@@ -182,7 +180,59 @@ export default class SocketBus {
         });
     }
 
-    public authWebhook(authorization: string) {
+    private async get(url: string) {
+        try {
+            let response = await this.http.get(url);
+            return response.data;
+        } catch(e) {
+            if (e.response) {
+                throw new Error("SocketBus Error " + JSON.stringify(e.response.data));
+            } else {
+                throw new Error(e);
+            }
+        }
+    }
+
+    /**
+     * Gets the api status
+     * - Total of users online
+     */
+    public async getStatus() {
+        return await this.get('/api/status');
+    }
+
+    /**
+     * Get all channels in use
+     */
+    public async getChannels() {
+        return await this.get('/api/channels');
+    }
+
+    /**
+     * Gets the count of users connected to a channel
+     * 
+     * @param channelName name of a channel
+     */
+    public async getCountUsersInChannel(channelName: string) {
+        return await this.get(`/api/channels/${channelName}`);
+    }
+
+    /**
+     * Gets all the users in a Channel
+     * 
+     * @param channelName name of a channel
+     */
+    public async getUsersInChannel(channelName: string) {
+        return await this.get(`/api/channels/${channelName}/users`);
+    }
+
+    /**
+     * Checks if an incoming webhook is valid
+     * 
+     * @param authorization token received on the header 'Authorization'
+     * @returns boolean
+     */
+    public authWebhook(authorization: string): boolean {
         return createHash('sha256').update(
             `webhook:${this.options.app_id}:${this.options.secret}`
         ).digest('hex') === authorization;
