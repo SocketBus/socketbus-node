@@ -19,7 +19,7 @@ describe('SocketBus', function() {
 
     it('broadcast', ()=>{
         return socketBus.broadcast('private-app.20', 'App\\Events\\AppReadingReceivedEvent', {
-            fuck: true
+            food: 'cupcake'
         }).then(data => {
             expect(data.length).toEqual(1)
         })
