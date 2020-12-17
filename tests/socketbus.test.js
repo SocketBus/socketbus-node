@@ -38,37 +38,49 @@ describe('SocketBus', function() {
         expect(socketBus.authWebhook(authorization2)).toBe(false);
     });
 
+    it('Auth Normal', () => {
+        const auth1 = socketBus.auth('socket-id', 'some-channel', true);
+        
+        expect(auth1.auth).toHaveLength(64);
+
+        const auth2 = socketBus.auth('socket-id', 'some-channel', false);
+        
+        expect(auth2.status).toBe('noauth');
+    });
+
     it('Auth presence', () => {
         const auth = socketBus.authPresence('socket-id', 'some-channel', 1, { user_id: 20 });
-        
         expect(auth.data).toBeDefined();
+
+        const auth2 = socketBus.authPresence('socket-id', 'some-channel', 1, false);
+        expect(auth2.status).toBe('noauth');
     });
     
     it('Get API status', () => {
         return socketBus.getStatus()
             .then(result => {
                 expect(result.users_count).toBeDefined();
-            })
+            });
     });
     
     it('Get API Channels', () => {
         return socketBus.getChannels()
             .then(result => {
                 expect(Array.isArray(result.rooms)).toBe(true);
-            })
+            });
     });
     
     it('Get API Users Count in Channels', () => {
         return socketBus.getCountUsersInChannel('presence-teste')
             .then(result => {
                 expect(result.users_count).toBeDefined();
-            })
+            });
     });
     
     it('Get API Users', () => {
         return socketBus.getUsersInChannel('presence-teste')
             .then(result => {
                 expect(Array.isArray(result.users)).toBe(true);
-            })
+            });
     });
 })

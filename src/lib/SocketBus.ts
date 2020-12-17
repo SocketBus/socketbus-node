@@ -147,12 +147,27 @@ export default class SocketBus {
      * @param result A boolean that informs if the user can(true) or can not(false) be authenticated to channel 
      */
     public auth(socketId: string, channelName: string, result: boolean = true) {
+        if (!result) {
+            return { status: 'noauth' };
+        }
+
         return this.parseResult({
             auth: this.generateHash(socketId, channelName)
         }, channelName);
     }
 
-    public authPresence(socketId: string, channelName: string, userId: any, result: boolean = true) {
+    /**
+     * 
+     * @param socketId Socket Id of the user trying to authenticate, this information comes on the auth request
+     * @param channelName The name of the channel that the user is trying to authenticate
+     * @param userId 
+     * @param result Data
+     */
+    public authPresence(socketId: string, channelName: string, userId: any, result: any) {
+        if (!result) {
+            return { status: 'noauth' };
+        }
+
         let encryption = this.encrypt(this.encryptData(result, channelName));
 
         return this.parseResult({
