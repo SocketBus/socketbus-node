@@ -5,6 +5,7 @@ import { AES, enc, lib } from "crypto-js";
 
 import SocketBusOptions from './interfaces/SocketBusOptions';
 import BroadcastResult from './interfaces/BroadcastResult';
+import BroadcastOptions from './interfaces/BroadcastOptions';
 
 const SOCKEBUS_DOMAIN = 'https://app.socketbus.com';
 
@@ -189,7 +190,7 @@ export default class SocketBus {
      * @param eventName The name of the event to be broadcasted
      * @param data The data to be sent to the clients
      */
-    public broadcast(channels: Array<string>|string, eventName: string, data: any): Promise<Array<BroadcastResult>> {
+    public broadcast(channels: Array<string>|string, eventName: string, data: any, options: BroadcastOptions = {}): Promise<Array<BroadcastResult>> {
 
         return new Promise((resolve: CallableFunction, reject: CallableFunction) => {
             if (!Array.isArray(channels)) {
@@ -217,7 +218,8 @@ export default class SocketBus {
                     const channel = channels[key];
                     this.http.post(`/api/channels/${channel}/broadcast`, {
                         'event': eventName,
-                        'data': this.encryptData(data, channel)
+                        'data': this.encryptData(data, channel),
+                        'i': options.ignoreUsers
                     }).then(
                         (response: any) => {
                             tryResolve(true, channel);
