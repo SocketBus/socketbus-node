@@ -66,7 +66,14 @@ if (/** verifies if user can access the request channel */) {
 const payload = {
     food: 'cupcake'
 }
-socketBus.broadcast('food-observer','new-food', payload)
+
+/** Optional */
+const broadcastOptions = {
+    // Id or Ids of users that should not receive the event
+    ignoreUsers: ['id1', 'id2']
+}
+
+socketBus.broadcast('food-observer','new-food', payload, broadcastOptions)
     .then(response => /** Event Sent */);
 ```
 
