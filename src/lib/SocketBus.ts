@@ -74,12 +74,16 @@ export default class SocketBus {
 
         let key = createHash('sha256').update(this.options.secret).digest('hex').substring(0, 32);
         let iv = createHash('sha256').update(this.options.app_id).digest('hex').substring(0, 16);
+        console.log(key, iv);
 
         let cipher = createCipheriv('aes-256-cbc', key, iv);
         let encrypted = cipher.update(json, 'utf8', 'base64');
         encrypted += cipher.final('base64');
 
-        return encrypted;
+
+        let buff = Buffer.from(encrypted);
+
+        return buff.toString('base64');
     }
 
     /**
