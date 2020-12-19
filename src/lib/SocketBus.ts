@@ -277,4 +277,37 @@ export default class SocketBus {
             `webhook:${this.options.app_id}:${this.options.secret}`
         ).digest('hex') === authorization;
     }
+
+    /**
+     * Checks if the channel is private
+     * 
+     * @param channel name of a channel
+     */
+    public isChannelPrivate(channel: string): boolean {
+        const [prefix] = channel.split('-');
+
+        return prefix === 'private';
+    }
+
+    /**
+     * Checks if the channel is presence
+     * 
+     * @param channel name of a channel
+     */
+    public isChannelPresence(channel: string): boolean {
+        const [prefix] = channel.split('-');
+
+        return prefix === 'presence';
+    }
+
+    /**
+     * Checks if the channel is public
+     * 
+     * @param channel name of a channel
+     */
+    public isChannelPublic(channel: string): boolean {
+        const [prefix] = channel.split('-');
+
+        return prefix === 'public';
+    }
 }
