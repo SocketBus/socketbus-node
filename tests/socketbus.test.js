@@ -1,19 +1,18 @@
 const SocketBus = require('../dist/main');
+const path = require('path');
+
+require('dotenv').config({ path: path.resolve(__dirname, '.env')})
 
 const { createHash } = require('crypto');
 
-const app_id = 's-1-J2PCu8g8sAejZeXx';
-const secret = 'cdKBpcruwYQ96kvIaYiorbTFxRDCbVfj';
+const  { APP_ID, APP_SECRET, CUSTOM_ENCRYPTION_KEY, CUSTOM_DOMAIN } = process.env;
 
 const socketBus = new SocketBus({
-    app_id: app_id,
-    secret: secret,
-    custom_encryption_key: 'My-test',
-    custom_domain: 'http://localhost:3001'
+    app_id: APP_ID,
+    secret: APP_SECRET,
+    custom_encryption_key: CUSTOM_ENCRYPTION_KEY,
+    custom_domain: CUSTOM_DOMAIN
 });
-
-
-
 
 describe('SocketBus', function() {
 
@@ -27,11 +26,11 @@ describe('SocketBus', function() {
     
     it('auth webhook', () => {
         const authorization1 = createHash('sha256').update(
-            `webhook:${app_id}:${secret}`
+            `webhook:${APP_ID}:${APP_SECRET}`
         ).digest('hex')
     
         const authorization2 = createHash('sha256').update(
-            `webhook:${app_id}:${secret.split('').reverse().join('')}`
+            `webhook:${APP_ID}:${APP_SECRET.split('').reverse().join('')}`
         ).digest('hex')
     
         expect(socketBus.authWebhook(authorization1)).toBe(true);

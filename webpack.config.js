@@ -28,11 +28,11 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-
+console.log(process.env.NODE_ENV)
 
 
 module.exports = {
-  mode: 'development',
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   target: 'node',
   entry: './src/index.ts',
   plugins: [new webpack.ProgressPlugin()],
