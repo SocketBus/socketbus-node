@@ -34,8 +34,10 @@ export default class SocketBus {
     constructor(options: SocketBusOptions) {
         this.options = options;
 
+        const [s, serverId, key] = this.options.app_id.split('-');
+
         this.http = axios.create({
-            baseURL: this.options.custom_domain ?? SOCKEBUS_DOMAIN,
+            baseURL: this.options.custom_domain ?? `https://s${serverId}.socketbus.com`,
             headers: {
                 'Authorization': this.getAuthorization()
             }
@@ -75,7 +77,6 @@ export default class SocketBus {
 
         let key = createHash('sha256').update(this.options.secret).digest('hex').substring(0, 32);
         let iv = createHash('sha256').update(this.options.app_id).digest('hex').substring(0, 16);
-        console.log(key, iv);
 
         let cipher = createCipheriv('aes-256-cbc', key, iv);
         let encrypted = cipher.update(json, 'utf8', 'base64');
